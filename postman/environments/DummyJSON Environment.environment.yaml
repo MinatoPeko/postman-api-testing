@@ -1,0 +1,6 @@
+name: DummyJSON Environment
+values:
+  - key: baseUrl
+    value: 'https://dummyjson.com'
+  - key: productId
+    value: '1'

@@ -1,0 +1,27 @@
+$kind: http-request
+description: Lấy danh sách 10 sản phẩm đầu tiên và kiểm tra phân trang.
+url: "{{baseUrl}}/products?limit=10&skip=0"
+method: GET
+queryParams:
+  limit: "10"
+  skip: "0"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code phải là 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Thời gian phản hồi < 1500ms", function () {
+          pm.expect(pm.response.responseTime).to.be.below(1500);
+      });
+
+      pm.test("Dữ liệu trả về đúng cấu trúc danh sách", function () {
+          const jsonData = pm.response.json();
+          pm.expect(jsonData).to.have.property("products");
+          pm.expect(jsonData.products).to.be.an("array");
+          pm.expect(jsonData.products.length).to.eql(10);
+          pm.expect(jsonData).to.have.property("total");
+      });
+    language: text/javascript
+order: 1000

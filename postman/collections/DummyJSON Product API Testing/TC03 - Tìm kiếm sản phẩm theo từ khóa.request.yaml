@@ -1,0 +1,29 @@
+$kind: http-request
+description: Tìm kiếm sản phẩm theo từ khóa 'phone'.
+url: "{{baseUrl}}/products/search?q=phone"
+method: GET
+queryParams:
+  q: phone
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code phải là 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Kết quả tìm kiếm không rỗng", function () {
+          const jsonData = pm.response.json();
+          pm.expect(jsonData.products).to.be.an("array");
+          pm.expect(jsonData.products.length).to.be.above(0);
+      });
+
+      pm.test("Sản phẩm tìm kiếm có chứa từ khóa liên quan", function () {
+          const jsonData = pm.response.json();
+          const firstItem = jsonData.products[0];
+          const keyword = "phone".toLowerCase();
+          const match = firstItem.title.toLowerCase().includes(keyword) || 
+                        firstItem.description.toLowerCase().includes(keyword);
+          pm.expect(match).to.be.true;
+      });
+    language: text/javascript
+order: 3000

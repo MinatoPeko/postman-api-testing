@@ -1,0 +1,30 @@
+$kind: http-request
+description: Gửi dữ liệu tạo mới một sản phẩm vào hệ thống.
+url: "{{baseUrl}}/products/add"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "title": "Bàn Phím Cơ Không Dây",
+      "price": 120,
+      "category": "electronics",
+      "stock": 50
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code phải là 200 hoặc 201", function () {
+          pm.expect(pm.response.code).to.be.oneOf([200, 201]);
+      });
+
+      pm.test("Sản phẩm được tạo có ID hợp lệ và đúng dữ liệu gửi lên", function () {
+          const jsonData = pm.response.json();
+          pm.expect(jsonData).to.have.property("id");
+          pm.expect(jsonData.title).to.eql("Bàn Phím Cơ Không Dây");
+          pm.expect(jsonData.price).to.eql(120);
+      });
+    language: text/javascript
+order: 4000

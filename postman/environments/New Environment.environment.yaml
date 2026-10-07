@@ -1,0 +1,10 @@
+name: New Environment
+values:
+  - key: baseUrl
+    value: https://dummyjson.com
+    type: default
+    enabled: true
+  - key: productId
+    value: "1"
+    type: default
+    enabled: true

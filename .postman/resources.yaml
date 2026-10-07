@@ -1,0 +1,15 @@
+# Use this workspace to collaborate
+workspace:
+  id: 28ff375d-527b-486c-8fa0-0e9ae5813b84
+
+localResources:
+  collections:
+    - ../DummyJSON Product API Testing
+  environments:
+    - ../postman_environment.json
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
+cloudResources:
+  collections:
+    ../DummyJSON Product API Testing: a1b2c3d4-e5f6-7890-abcd-ef1234567890
