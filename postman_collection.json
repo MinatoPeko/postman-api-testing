@@ -1,0 +1,295 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "DummyJSON Product API Testing",
+		"description": "Bộ sưu tập kiểm thử API sản phẩm (CRUD) trên nền tảng DummyJSON phục vụ bài tập báo cáo kiểm thử Postman.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "TC01 - Lấy danh sách sản phẩm (Pagination)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Thời gian phản hồi < 1500ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1500);",
+							"});",
+							"",
+							"pm.test(\"Dữ liệu trả về đúng cấu trúc danh sách\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property(\"products\");",
+							"    pm.expect(jsonData.products).to.be.an(\"array\");",
+							"    pm.expect(jsonData.products.length).to.eql(10);",
+							"    pm.expect(jsonData).to.have.property(\"total\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products?limit=10&skip=0",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10"
+						},
+						{
+							"key": "skip",
+							"value": "0"
+						}
+					]
+				},
+				"description": "Lấy danh sách 10 sản phẩm đầu tiên và kiểm tra phân trang."
+			},
+			"response": []
+		},
+		{
+			"name": "TC02 - Lấy chi tiết sản phẩm theo ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Thông tin sản phẩm trả về đúng ID yêu cầu\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    const expectedId = parseInt(pm.environment.get(\"productId\"));",
+							"    pm.expect(jsonData.id).to.eql(expectedId);",
+							"});",
+							"",
+							"pm.test(\"Sản phẩm có đầy đủ các trường thông tin bắt buộc\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property(\"title\");",
+							"    pm.expect(jsonData).to.have.property(\"price\");",
+							"    pm.expect(jsonData).to.have.property(\"category\");",
+							"    pm.expect(jsonData.price).to.be.above(0);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products/{{productId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products",
+						"{{productId}}"
+					]
+				},
+				"description": "Lấy thông tin chi tiết của sản phẩm theo productId trong environment."
+			},
+			"response": []
+		},
+		{
+			"name": "TC03 - Tìm kiếm sản phẩm theo từ khóa",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Kết quả tìm kiếm không rỗng\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.products).to.be.an(\"array\");",
+							"    pm.expect(jsonData.products.length).to.be.above(0);",
+							"});",
+							"",
+							"pm.test(\"Sản phẩm tìm kiếm có chứa từ khóa liên quan\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    const firstItem = jsonData.products[0];",
+							"    const keyword = \"phone\".toLowerCase();",
+							"    const match = firstItem.title.toLowerCase().includes(keyword) || ",
+							"                  firstItem.description.toLowerCase().includes(keyword);",
+							"    pm.expect(match).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products/search?q=phone",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products",
+						"search"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "phone"
+						}
+					]
+				},
+				"description": "Tìm kiếm sản phẩm theo từ khóa 'phone'."
+			},
+			"response": []
+		},
+		{
+			"name": "TC04 - Thêm mới sản phẩm (POST)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 hoặc 201\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+							"});",
+							"",
+							"pm.test(\"Sản phẩm được tạo có ID hợp lệ và đúng dữ liệu gửi lên\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property(\"id\");",
+							"    pm.expect(jsonData.title).to.eql(\"Bàn Phím Cơ Không Dây\");",
+							"    pm.expect(jsonData.price).to.eql(120);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"title\": \"Bàn Phím Cơ Không Dây\",\n  \"price\": 120,\n  \"category\": \"electronics\",\n  \"stock\": 50\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/products/add",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products",
+						"add"
+					]
+				},
+				"description": "Gửi dữ liệu tạo mới một sản phẩm vào hệ thống."
+			},
+			"response": []
+		},
+		{
+			"name": "TC05 - Cập nhật sản phẩm (PUT)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Tiêu đề và giá đã được cập nhật thành công\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.title).to.eql(\"Sản Phẩm Đã Cập Nhật Tên\");",
+							"    pm.expect(jsonData.price).to.eql(999);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"title\": \"Sản Phẩm Đã Cập Nhật Tên\",\n  \"price\": 999\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/products/{{productId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products",
+						"{{productId}}"
+					]
+				},
+				"description": "Cập nhật thông tin cho sản phẩm theo productId."
+			},
+			"response": []
+		},
+		{
+			"name": "TC06 - Xóa sản phẩm (DELETE)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Xác nhận sản phẩm đã được đánh dấu xóa\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property(\"isDeleted\");",
+							"    pm.expect(jsonData.isDeleted).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/products/{{productId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"products",
+						"{{productId}}"
+					]
+				},
+				"description": "Gửi yêu cầu xóa sản phẩm theo productId."
+			},
+			"response": []
+		}
+	]
+}
